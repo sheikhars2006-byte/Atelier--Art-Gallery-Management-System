@@ -544,10 +544,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👨‍💻 Authors
 
-**[Your Name]**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Email: your.email@example.com
-- LinkedIn: [Your Profile](https://linkedin.com/in/yourprofile)
+**[ALISHA RAMZAN SHEIKH]**
+- GitHub: https://github.com/sheikhars2006-byte
+- Email: sheikh.ars2006@gmail.com
+- LinkedIn: https://linkedin.com/in/alisha-sheikh-47706a35b
 
 ---
 
