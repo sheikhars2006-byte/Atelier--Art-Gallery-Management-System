@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales - Art Gallery</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">🎨 Atelier</h1>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="artists.html">Artists</a></li>
+                <li><a href="artworks.html">Artworks</a></li>
+                <li><a href="sales.html" class="active">Sales</a></li>
+                <li><a href="exhibitions.html">Exhibitions</a></li>
+                <li><a href="events.html">Events</a></li>
+                <li><a href="billing.html">Billing</a></li>
+                <li><a href="artist-submit.html">Submit Artwork</a></li>
+                <li><a href="admin-submissions.html">Submissions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="page-header">
+            <h1>Sales Records</h1>
+            <button class="btn btn-primary" onclick="showRecordSaleForm()">+ Record New Sale</button>
+        </header>
+
+        <!-- Record Sale Form -->
+        <div id="recordSaleForm" class="form-container" style="display: none;">
+            <h2>Record New Sale</h2>
+            <form onsubmit="recordSale(event)">
+                <div class="form-group">
+                    <label>Artwork:</label>
+                    <select id="saleArtworkId" required>
+                        <option value="">Select Artwork</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Customer:</label>
+                    <select id="saleCustomerId" required>
+                        <option value="">Select Customer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Sale Date:</label>
+                    <input type="date" id="saleDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Sale Amount (₹):</label>
+                    <input type="number" id="saleAmount" step="0.01" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Record Sale</button>
+                    <button type="button" class="btn" onclick="hideRecordSaleForm()">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sales Table -->
+        <div class="table-container">
+            <table id="salesTable">
+                <thead>
+                    <tr>
+                        <th>Sale ID</th>
+                        <th>Artwork</th>
+                        <th>Customer</th>
+                        <th>Sale Date</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="salesTableBody">
+                    <tr>
+                        <td colspan="5" style="text-align: center;">Loading sales...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Art Gallery Management System</p>
+    </footer>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSales();
+            loadAvailableArtworks();
+            loadCustomers();
+            setTodayDate();
+        });
+
+        function setTodayDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('saleDate').value = today;
+        }
+
+        async function loadSales() {
+            try {
+                const response = await fetch('http://localhost:3000/api/sales');
+                const sales = await response.json();
+                
+                const tbody = document.getElementById('salesTableBody');
+                
+                if (sales.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No sales found</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = sales.map(sale => `
+                    <tr>
+                        <td>${sale.Sale_ID}</td>
+                        <td>${sale.Artwork_Title || 'N/A'}</td>
+                        <td>${sale.Customer_Name || 'N/A'}</td>
+                        <td>${new Date(sale.Sale_Date).toLocaleDateString()}</td>
+                        <td>₹${sale.Sale_Amount.toLocaleString()}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading sales:', error);
+                document.getElementById('salesTableBody').innerHTML = 
+                    '<tr><td colspan="5" style="text-align: center; color: red;">Error loading sales</td></tr>';
+            }
+        }
+
+        async function loadAvailableArtworks() {
+            try {
+                const response = await fetch('http://localhost:3000/api/artworks/available');
+                const artworks = await response.json();
+                
+                const select = document.getElementById('saleArtworkId');
+                select.innerHTML = '<option value="">Select Artwork</option>' + 
+                    artworks.map(art => 
+                        `<option value="${art.Artwork_ID}" data-price="${art.Price}">
+                            ${art.Title} - ₹${art.Price.toLocaleString()}
+                        </option>`
+                    ).join('');
+                
+                // Auto-fill price when artwork is selected
+                select.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    if (selectedOption.dataset.price) {
+                        document.getElementById('saleAmount').value = selectedOption.dataset.price;
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading artworks:', error);
+            }
+        }
+
+        async function loadCustomers() {
+            try {
+                const response = await fetch('http://localhost:3000/api/customers');
+                const customers = await response.json();
+                
+                const select = document.getElementById('saleCustomerId');
+                select.innerHTML = '<option value="">Select Customer</option>' + 
+                    customers.map(customer => 
+                        `<option value="${customer.Customer_ID}">${customer.Name} - ${customer.Email}</option>`
+                    ).join('');
+            } catch (error) {
+                console.error('Error loading customers:', error);
+            }
+        }
+
+        function showRecordSaleForm() {
+            document.getElementById('recordSaleForm').style.display = 'block';
+        }
+
+        function hideRecordSaleForm() {
+            document.getElementById('recordSaleForm').style.display = 'none';
+            document.querySelector('#recordSaleForm form').reset();
+            setTodayDate();
+        }
+
+        async function recordSale(event) {
+            event.preventDefault();
+            
+            const saleData = {
+                artwork_id: document.getElementById('saleArtworkId').value,
+                customer_id: document.getElementById('saleCustomerId').value,
+                sale_date: document.getElementById('saleDate').value,
+                sale_amount: document.getElementById('saleAmount').value
+            };
+
+            try {
+                const response = await fetch('http://localhost:3000/api/sales/record', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(saleData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Sale recorded successfully!');
+                    hideRecordSaleForm();
+                    loadSales();
+                    loadAvailableArtworks();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error recording sale:', error);
+                alert('Error recording sale. Please try again.');
+            }
+        }
+    </script>
+    <script src="auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing - Art Gallery</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .invoice-container {
+            background: white;
+            padding: 3rem;
+            border-radius: 10px;
+            max-width: 800px;
+            margin: 2rem auto;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .invoice-header {
+            text-align: center;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .invoice-header h1 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        
+        .invoice-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .invoice-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+        
+        .invoice-section h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        
+        .invoice-section p {
+            margin: 0.5rem 0;
+            color: #333;
+        }
+        
+        .invoice-items {
+            margin: 2rem 0;
+        }
+        
+        .invoice-items table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .invoice-items th {
+            background: #667eea;
+            color: white;
+            padding: 1rem;
+            text-align: left;
+        }
+        
+        .invoice-items td {
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .invoice-total {
+            text-align: right;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 3px solid #667eea;
+        }
+        
+        .invoice-total h2 {
+            color: #667eea;
+            font-size: 2rem;
+        }
+        
+        .print-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 2rem;
+        }
+        
+        @media print {
+            .navbar, .print-btn, footer {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">🎨 Atelier</h1>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="artists.html">Artists</a></li>
+                <li><a href="artworks.html">Artworks</a></li>
+                <li><a href="sales.html">Sales</a></li>
+                <li><a href="exhibitions.html">Exhibitions</a></li>
+                <li><a href="events.html">Events</a></li>
+                <li><a href="billing.html" class="active">Billing</a></li>
+                <li><a href="artist-submit.html">Submit Artwork</a></li>
+                <li><a href="admin-submissions.html">Submissions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="page-header">
+            <h1>Billing Records</h1>
+        </header>
+
+        <!-- Billing Table -->
+        <div class="table-container">
+            <table id="billingTable">
+                <thead>
+                    <tr>
+                        <th>Bill ID</th>
+                        <th>Customer</th>
+                        <th>Artwork</th>
+                        <th>Bill Date</th>
+                        <th>Amount</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="billingTableBody">
+                    <tr>
+                        <td colspan="6" style="text-align: center;">Loading billing records...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Invoice Modal (Hidden by default) -->
+        <div id="invoiceModal" style="display: none;">
+            <div class="invoice-container" id="invoiceContent">
+                <!-- Invoice content will be loaded here -->
+            </div>
+            <div style="text-align: center;">
+                <button class="print-btn" onclick="window.print()">🖨️ Print Invoice</button>
+                <button class="btn" onclick="closeInvoice()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Art Gallery Management System</p>
+    </footer>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', loadBilling);
+
+        async function loadBilling() {
+            try {
+                const response = await fetch('http://localhost:3000/api/billing');
+                const billing = await response.json();
+                
+                const tbody = document.getElementById('billingTableBody');
+                
+                if (billing.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No billing records found</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = billing.map(bill => `
+                    <tr>
+                        <td><strong>#${bill.Bill_ID}</strong></td>
+                        <td>${bill.Customer_Name || 'N/A'}</td>
+                        <td>${bill.Artwork_Title || 'N/A'}</td>
+                        <td>${new Date(bill.Bill_Date).toLocaleString()}</td>
+                        <td>₹${bill.Amount.toLocaleString()}</td>
+                        <td>
+                            <button class="btn btn-primary" onclick="viewInvoice(${bill.Bill_ID})">
+                                View Invoice
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading billing:', error);
+                document.getElementById('billingTableBody').innerHTML = 
+                    '<tr><td colspan="6" style="text-align: center; color: red;">Error loading billing records</td></tr>';
+            }
+        }
+
+        async function viewInvoice(billId) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/billing/${billId}`);
+                const bill = await response.json();
+                
+                if (!bill.Bill_ID) {
+                    alert('Bill not found');
+                    return;
+                }
+                
+                const invoiceHTML = `
+                    <div class="invoice-header">
+                        <h1>🎨 Art Gallery</h1>
+                        <h2>INVOICE</h2>
+                        <p>Invoice #${bill.Bill_ID}</p>
+                        <p>Date: ${new Date(bill.Bill_Date).toLocaleDateString()}</p>
+                    </div>
+                    
+                    <div class="invoice-details">
+                        <div class="invoice-section">
+                            <h3>Bill To:</h3>
+                            <p><strong>${bill.Customer_Name}</strong></p>
+                            <p>Email: ${bill.Customer_Email}</p>
+                            <p>Phone: ${bill.Customer_Phone || 'N/A'}</p>
+                            <p>Address: ${bill.Customer_Address || 'N/A'}</p>
+                        </div>
+                        
+                        <div class="invoice-section">
+                            <h3>From:</h3>
+                            <p><strong>Art Gallery Management</strong></p>
+                            <p>Email: info@artgallery.com</p>
+                            <p>Phone: +91-1234567890</p>
+                            <p>Address: Mumbai, India</p>
+                        </div>
+                    </div>
+                    
+                    <div class="invoice-items">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Artist</th>
+                                    <th>Sale Date</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>${bill.Artwork_Title}</strong></td>
+                                    <td>${bill.Artist_Name || 'Unknown'}</td>
+                                    <td>${new Date(bill.Sale_Date).toLocaleDateString()}</td>
+                                    <td>₹${bill.Amount.toLocaleString()}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="invoice-total">
+                        <h2>Total Amount: ₹${bill.Amount.toLocaleString()}</h2>
+                        <p style="margin-top: 1rem; color: #666;">Thank you for your purchase!</p>
+                    </div>
+                `;
+                
+                document.getElementById('invoiceContent').innerHTML = invoiceHTML;
+                document.getElementById('invoiceModal').style.display = 'block';
+                document.querySelector('.table-container').style.display = 'none';
+                document.querySelector('.page-header').style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error loading invoice:', error);
+                alert('Error loading invoice');
+            }
+        }
+
+        function closeInvoice() {
+            document.getElementById('invoiceModal').style.display = 'none';
+            document.querySelector('.table-container').style.display = 'block';
+            document.querySelector('.page-header').style.display = 'flex';
+        }
+    </script>
+    <script src="auth.js"></script>
+</body>
+</html>

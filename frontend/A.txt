@@ -1,0 +1,57 @@
+-- CREATE(insert) OPERATION
+-- Add Artist
+INSERT INTO Artist (Name, Country, Email) 
+VALUES ('John Doe', 'USA', 'john@example.com');
+-- Add Artwork
+INSERT INTO Artwork (Title, Artist_ID, Category, Price, Status) 
+VALUES ('Sunset Dreams', 3, 'Landscape', 18000, 'Available');
+-- Add Customer
+INSERT INTO Customer (Name, Phone, Email) 
+VALUES ('Maya Patel', '9988776655', 'maya@gmail.com');
+-- Record Sale
+CALL RecordSale(5, 2, '2025-01-15', 28000);
+-- Add Exhibition
+INSERT INTO Exhibition (Title, Start_Date, End_Date, Location) 
+VALUES ('Modern Masters', '2025-02-01', '2025-02-15', 'Mumbai');
+
+-- READ (SELECT) Operations
+-- All Artists
+SELECT * FROM Artist;
+-- Artworks with Artist Name
+SELECT a.Title, a.Category, a.Price, ar.Name AS Artist
+FROM Artwork a
+JOIN Artist ar ON a.Artist_ID = ar.Artist_ID;
+-- Available Artworks
+SELECT Title, Price FROM Artwork WHERE Status = 'Available';
+-- Sales Details
+SELECT s.Sale_ID, a.Title, c.Name, s.Sale_Amount
+FROM Sales s
+JOIN Artwork a ON s.Artwork_ID = a.Artwork_ID
+JOIN Customer c ON s.Customer_ID = c.Customer_ID;
+-- Dashboard Stats
+SELECT 
+ (SELECT COUNT(*) FROM Artist) AS Artists,
+ (SELECT COUNT(*) FROM Artwork) AS Artworks,
+ (SELECT SUM(Sale_Amount) FROM Sales) AS Revenue;
+
+ UPDATE Operations
+-- Update Artist
+UPDATE Artist 
+SET Phone = '+91-9999999999'
+WHERE Artist_ID = 1;
+-- Update Artwork Price
+UPDATE Artwork 
+SET Price = 30000 
+WHERE Artwork_ID = 5;
+-- Approve Submission
+UPDATE Artwork_Submissions
+SET Status = 'Approved'
+WHERE Submission_ID = 1;
+
+DELETE Operations
+-- Delete Artist
+DELETE FROM Artist WHERE Artist_ID = 10;
+-- Delete Customer
+DELETE FROM Customer WHERE Customer_ID = 8;
+-- Delete Exhibition
+DELETE FROM Exhibition WHERE Exhibition_ID = 5;

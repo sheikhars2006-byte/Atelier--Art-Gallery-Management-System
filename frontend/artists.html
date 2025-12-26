@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artists - Art Gallery</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .btn-edit {
+            background: #4CAF50;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-delete {
+            background: #f44336;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">🎨 Atelier</h1>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="artists.html"class="active">Artists</a></li>
+                <li><a href="artworks.html">Artworks</a></li>
+                <li><a href="sales.html">Sales</a></li>
+                <li><a href="exhibitions.html">Exhibitions</a></li>
+                <li><a href="events.html">Events</a></li>
+                <li><a href="billing.html">Billing</a></li>
+                <li><a href="artist-submit.html">Submit Artwork</a></li>
+                <li><a href="admin-submissions.html">Submissions</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+
+    <div class="container">
+        <header class="page-header">
+            <h1>Artists</h1>
+            <button class="btn btn-primary" onclick="showAddForm()">+ Add New Artist</button>
+        </header>
+
+        <!-- Add/Edit Artist Form -->
+        <div id="artistForm" class="form-container" style="display: none;">
+            <h2 id="formTitle">Add New Artist</h2>
+            <form onsubmit="saveArtist(event)">
+                <input type="hidden" id="artistId">
+                <div class="form-group">
+                    <label>Name: <span style="color: red;">*</span></label>
+                    <input type="text" id="artistName" required minlength="2" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label>Country: <span style="color: red;">*</span></label>
+                    <input type="text" id="artistCountry" required maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label>Biography: <span style="color: red;">*</span></label>
+                    <textarea id="artistBio" rows="4" required minlength="10"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Birth Year: <span style="color: red;">*</span></label>
+                    <input type="number" id="artistBirthYear" min="1800" max="2024" required>
+                </div>
+                <div class="form-group">
+                    <label>Email: <span style="color: red;">*</span></label>
+                    <input type="email" id="artistEmail" required maxlength="150">
+                </div>
+                <div class="form-group">
+                    <label>Phone:</label>
+                    <input type="tel" id="artistPhone" pattern="[+]?[0-9]{10,15}" placeholder="+91-9876543210">
+                    <small>Format: +91-9876543210</small>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Add Artist</button>
+                    <button type="button" class="btn" onclick="hideForm()">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Artists Table -->
+        <div class="table-container">
+            <table id="artistsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Country</th>
+                        <th>Birth Year</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Biography</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="artistsTableBody">
+                    <tr>
+                        <td colspan="8" style="text-align: center;">Loading artists...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Art Gallery Management System</p>
+    </footer>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', loadArtists);
+
+        async function loadArtists() {
+            try {
+                const response = await fetch('http://localhost:3000/api/artists');
+                const artists = await response.json();
+                
+                const tbody = document.getElementById('artistsTableBody');
+                
+                if (artists.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No artists found</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = artists.map(artist => `
+                    <tr>
+                        <td>${artist.Artist_ID}</td>
+                        <td><strong>${artist.Name}</strong></td>
+                        <td>${artist.Country}</td>
+                        <td>${artist.Birth_Year}</td>
+                        <td>${artist.Email}</td>
+                        <td>${artist.Phone || 'N/A'}</td>
+                        <td>${artist.Biography}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-edit" onclick='editArtist(${JSON.stringify(artist)})'>Edit</button>
+                                <button class="btn-delete" onclick="deleteArtist(${artist.Artist_ID}, '${artist.Name}')">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading artists:', error);
+                document.getElementById('artistsTableBody').innerHTML = 
+                    '<tr><td colspan="8" style="text-align: center; color: red;">Error loading artists</td></tr>';
+            }
+        }
+
+        function showAddForm() {
+            document.getElementById('formTitle').textContent = 'Add New Artist';
+            document.getElementById('submitBtn').textContent = 'Add Artist';
+            document.getElementById('artistId').value = '';
+            document.getElementById('artistForm').style.display = 'block';
+            document.querySelector('#artistForm form').reset();
+        }
+
+        function hideForm() {
+            document.getElementById('artistForm').style.display = 'none';
+            document.querySelector('#artistForm form').reset();
+        }
+
+        function editArtist(artist) {
+            document.getElementById('formTitle').textContent = 'Edit Artist';
+            document.getElementById('submitBtn').textContent = 'Update Artist';
+            document.getElementById('artistId').value = artist.Artist_ID;
+            document.getElementById('artistName').value = artist.Name;
+            document.getElementById('artistCountry').value = artist.Country;
+            document.getElementById('artistBio').value = artist.Biography;
+            document.getElementById('artistBirthYear').value = artist.Birth_Year;
+            document.getElementById('artistEmail').value = artist.Email;
+            document.getElementById('artistPhone').value = artist.Phone || '';
+            document.getElementById('artistForm').style.display = 'block';
+        }
+
+        async function saveArtist(event) {
+            event.preventDefault();
+            
+            const artistId = document.getElementById('artistId').value;
+            const artistData = {
+                name: document.getElementById('artistName').value.trim(),
+                country: document.getElementById('artistCountry').value.trim(),
+                biography: document.getElementById('artistBio').value.trim(),
+                birth_year: parseInt(document.getElementById('artistBirthYear').value),
+                email: document.getElementById('artistEmail').value.trim(),
+                phone: document.getElementById('artistPhone').value.trim()
+            };
+
+            // Validation
+            if (artistData.birth_year < 1800 || artistData.birth_year > 2024) {
+                alert('Birth year must be between 1800 and 2024');
+                return;
+            }
+
+            try {
+                let response;
+                if (artistId) {
+                    // Update existing artist
+                    artistData.artist_id = artistId;
+                    response = await fetch('http://localhost:3000/api/artists/update', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(artistData)
+                    });
+                } else {
+                    // Add new artist
+                    response = await fetch('http://localhost:3000/api/artists/add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(artistData)
+                    });
+                }
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(artistId ? 'Artist updated successfully!' : 'Artist added successfully!');
+                    hideForm();
+                    loadArtists();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error saving artist:', error);
+                alert('Error saving artist. Please try again.');
+            }
+        }
+
+        async function deleteArtist(artistId, artistName) {
+            if (!confirm(`Are you sure you want to delete artist "${artistName}"? This will also delete all their artworks!`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/artists/delete/${artistId}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Artist deleted successfully!');
+                    loadArtists();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error deleting artist:', error);
+                alert('Error deleting artist. They may have associated artworks.');
+            }
+        }
+    </script>
+    <script src="auth.js"></script>
+</body>
+</html>

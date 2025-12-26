@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Artwork - Atelier</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">🎨 Atelier</h1>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="artists.html">Artists</a></li>
+                <li><a href="artworks.html">Collection</a></li>
+                <li><a href="sales.html">Sales</a></li>
+                <li><a href="exhibitions.html">Exhibitions</a></li>
+                <li><a href="events.html">Events</a></li>
+                <li><a href="billing.html">Billing</a></li>
+                <li><a href="artist-submit.html" class="active">Submit Artwork</a></li>
+                <li><a href="admin-submissions.html">Manage Submissions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-container" style="max-width: 800px; margin: 2rem auto;">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h1 style="
+                 font-family: 'Playfair Display', serif;
+                 background: linear-gradient(135deg, #ffd700, #ff6b9d);
+                 background-clip: text;
+                 -webkit-background-clip: text;
+                 -webkit-text-fill-color: transparent;
+                 font-size: 3rem;
+                 margin-bottom: 1rem;
+                 ">
+                 🎨 Submit Your Artwork
+                  </h1>
+
+                <p style="color: rgba(255, 255, 255, 0.8); font-size: 1.2rem;">Share your masterpiece with us! Our team will review and get back to you.</p>
+            </div>
+
+            <div id="successMessage" style="background: #4CAF50; color: white; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; display: none;"></div>
+            <div id="errorMessage" style="background: #f44336; color: white; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; display: none;"></div>
+
+            <form id="submissionForm" onsubmit="submitArtwork(event)">
+                <div class="form-group">
+                    <label>Artist Name: <span style="color: #ff6b9d;">*</span></label>
+                    <input type="text" id="artistName" required minlength="2" maxlength="100">
+                </div>
+
+                <div class="form-group">
+                    <label>Email: <span style="color: #ff6b9d;">*</span></label>
+                    <input type="email" id="email" required maxlength="150">
+                </div>
+
+                <div class="form-group">
+                    <label>Phone:</label>
+                    <input type="tel" id="phone" pattern="[0-9]{10}" placeholder="9876543210">
+                    <small>10 digit phone number (optional)</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Artwork Title: <span style="color: #ff6b9d;">*</span></label>
+                    <input type="text" id="title" required minlength="2" maxlength="150">
+                </div>
+
+                <div class="form-group">
+                    <label>Category: <span style="color: #ff6b9d;">*</span></label>
+                    <select id="category" required>
+                        <option value="">Select Category</option>
+                        <option value="Painting">Painting</option>
+                        <option value="Sculpture">Sculpture</option>
+                        <option value="Digital Art">Digital Art</option>
+                        <option value="Photography">Photography</option>
+                        <option value="Abstract">Abstract</option>
+                        <option value="Portrait">Portrait</option>
+                        <option value="Landscape">Landscape</option>
+                        <option value="Surrealism">Surrealism</option>
+                        <option value="Watercolor">Watercolor</option>
+                        <option value="Mixed Media">Mixed Media</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Price (₹): <span style="color: #ff6b9d;">*</span></label>
+                    <input type="number" id="price" required min="1000" step="100">
+                    <small>Minimum ₹1,000</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Year Created: <span style="color: #ff6b9d;">*</span></label>
+                    <input type="number" id="yearCreated" required min="1900" max="2025">
+                </div>
+
+                <div class="form-group">
+                    <label>Description: <span style="color: #ff6b9d;">*</span></label>
+                    <textarea id="description" rows="5" required minlength="20" maxlength="500"></textarea>
+                    <small>Tell us about your artwork (20-500 characters)</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Image URL:</label>
+                    <input type="url" id="imageUrl" placeholder="https://example.com/image.jpg">
+                    <small>Optional: Paste a link to your artwork image</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Artwork</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Atelier Contemporary Art Gallery</p>
+    </footer>
+
+    <script>
+        function showMessage(message, isError = false) {
+            const successDiv = document.getElementById('successMessage');
+            const errorDiv = document.getElementById('errorMessage');
+
+            if (isError) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+                successDiv.style.display = 'none';
+                setTimeout(() => { errorDiv.style.display = 'none'; }, 5000);
+            } else {
+                successDiv.textContent = message;
+                successDiv.style.display = 'block';
+                errorDiv.style.display = 'none';
+                setTimeout(() => { successDiv.style.display = 'none'; }, 5000);
+            }
+        }
+
+        async function submitArtwork(event) {
+            event.preventDefault();
+
+            const submissionData = {
+                artist_name: document.getElementById('artistName').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                title: document.getElementById('title').value.trim(),
+                category: document.getElementById('category').value,
+                price: parseFloat(document.getElementById('price').value),
+                year_created: parseInt(document.getElementById('yearCreated').value),
+                description: document.getElementById('description').value.trim(),
+                image_url: document.getElementById('imageUrl').value.trim() || null
+            };
+
+            if (submissionData.price < 1000) {
+                showMessage('Price must be at least ₹1,000', true);
+                return;
+            }
+
+            if (submissionData.year_created < 1900 || submissionData.year_created > 2025) {
+                showMessage('Year must be between 1900 and 2025', true);
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/api/submissions/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(submissionData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showMessage('✅ Artwork submitted successfully! Our team will review it soon.');
+                    document.getElementById('submissionForm').reset();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    showMessage('Error: ' + result.error, true);
+                }
+            } catch (error) {
+                console.error('Submission error:', error);
+                showMessage('Error submitting artwork. Please try again.', true);
+            }
+        }
+    </script>
+</body>
+</html>

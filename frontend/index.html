@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atelier - Contemporary Art Gallery</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">🎨 Atelier</h1>
+            <ul class="nav-links">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="artists.html">Artists</a></li>
+                <li><a href="artworks.html">Collection</a></li>
+                <li><a href="sales.html">Sales</a></li>
+                <li><a href="exhibitions.html">Exhibitions</a></li>
+                <li><a href="events.html">Events</a></li>
+                <li><a href="billing.html">Billing</a></li>
+                <li><a href="artist-submit.html">Submit Artwork</a></li>
+                <li><a href="admin-submissions.html">Manage Submissions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Hero Section -->
+        <header class="hero">
+            <h1>Where Art Meets Vision</h1>
+            <p>Curating Contemporary Excellence</p>
+        </header>
+
+        <!-- Stats Dashboard -->
+        <section class="dashboard">
+            <h2>Gallery Insights</h2>
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-icon">👨‍🎨</div>
+                    <h3>Featured Artists</h3>
+                    <p class="stat-number" id="totalArtists">Loading...</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🖼️</div>
+                    <h3>Artworks</h3>
+                    <p class="stat-number" id="totalArtworks">Loading...</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <h3>Acquisitions</h3>
+                    <p class="stat-number" id="totalSales">Loading...</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💵</div>
+                    <h3>Total Value</h3>
+                    <p class="stat-number" id="totalRevenue">Loading...</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <h3>Available</h3>
+                    <p class="stat-number" id="availableArtworks">Loading...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="features">
+            <h2>Experience Atelier</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>👨‍🎨 Featured Artists</h3>
+                    <p>Discover emerging and established artists from around the world. Each with their unique vision and masterful technique.</p>
+                    <a href="artists.html" class="btn">Explore Artists</a>
+                </div>
+                <div class="feature-card">
+                    <h3>🖼️ Curated Collection</h3>
+                    <p>Browse our carefully selected collection of contemporary artworks. From abstract to realism, find pieces that speak to you.</p>
+                    <a href="artworks.html" class="btn">View Collection</a>
+                </div>
+                <div class="feature-card">
+                    <h3>🎪 Exhibitions</h3>
+                    <p>Experience our thoughtfully curated exhibitions featuring diverse artistic perspectives and innovative works.</p>
+                    <a href="exhibitions.html" class="btn">Current Shows</a>
+                </div>
+                <div class="feature-card">
+                    <h3>📅 Gallery Events</h3>
+                    <p>Join us for artist talks, workshops, and special events. Connect with the art community and deepen your appreciation.</p>
+                    <a href="events.html" class="btn">Upcoming Events</a>
+                </div>
+                <div class="feature-card">
+                    <h3>🎨 Submit Your Work</h3>
+                    <p>Are you an artist? Share your vision with us. We're always looking for fresh perspectives and exceptional talent.</p>
+                    <a href="artist-submit.html" class="btn">Submit Artwork</a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Atelier Contemporary Art Gallery</p>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script>
+        async function loadStats() {
+            try {
+                const response = await fetch('http://localhost:3000/api/stats');
+                const stats = await response.json();
+                
+                document.getElementById('totalArtists').textContent = stats.totalArtists || 0;
+                document.getElementById('totalArtworks').textContent = stats.totalArtworks || 0;
+                document.getElementById('totalSales').textContent = stats.totalSales || 0;
+                document.getElementById('totalRevenue').textContent = '₹' + (stats.totalRevenue || 0).toLocaleString();
+                document.getElementById('availableArtworks').textContent = stats.availableArtworks || 0;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                document.querySelectorAll('.stat-number').forEach(el => {
+                    el.textContent = 'Error';
+                });
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadStats);
+    </script>
+</body>
+</html>

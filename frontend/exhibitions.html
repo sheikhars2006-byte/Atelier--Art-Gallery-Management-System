@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exhibitions - Art Gallery</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">🎨 Atelier</h1>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="artists.html">Artists</a></li>
+                <li><a href="artworks.html">Artworks</a></li>
+                <li><a href="sales.html">Sales</a></li>
+                <li><a href="exhibitions.html" class="active">Exhibitions</a></li>
+                <li><a href="events.html">Events</a></li>
+                <li><a href="billing.html">Billing</a></li>
+                <li><a href="artist-submit.html">Submit Artwork</a></li>
+                <li><a href="admin-submissions.html">Submissions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="page-header">
+            <h1>Exhibitions</h1>
+        </header>
+
+        <!-- Exhibitions Grid -->
+        <div class="exhibitions-grid" id="exhibitionsGrid">
+            <p style="text-align: center; grid-column: 1/-1;">Loading exhibitions...</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Art Gallery Management System</p>
+    </footer>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', loadExhibitions);
+
+        async function loadExhibitions() {
+            try {
+                const response = await fetch('http://localhost:3000/api/exhibitions');
+                const exhibitions = await response.json();
+                
+                const grid = document.getElementById('exhibitionsGrid');
+                
+                if (exhibitions.length === 0) {
+                    grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No exhibitions found</p>';
+                    return;
+                }
+                
+                grid.innerHTML = exhibitions.map(exhibition => {
+                    const startDate = new Date(exhibition.Start_Date).toLocaleDateString();
+                    const endDate = new Date(exhibition.End_Date).toLocaleDateString();
+                    
+                    return `
+                        <div class="exhibition-card">
+                            <div class="exhibition-header">
+                                <h3>${exhibition.Title}</h3>
+                                <span class="exhibition-type">${exhibition.Type}</span>
+                            </div>
+                            <div class="exhibition-body">
+                                <p><strong>📅 Duration:</strong> ${startDate} - ${endDate}</p>
+                                <p><strong>📍 Location:</strong> ${exhibition.Location}</p>
+                                <p class="exhibition-description">${exhibition.Description || 'No description available'}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading exhibitions:', error);
+                document.getElementById('exhibitionsGrid').innerHTML = 
+                    '<p style="color: red; grid-column: 1/-1; text-align: center;">Error loading exhibitions</p>';
+            }
+        }
+    </script>
+    <script src="auth.js"></script>
+</body>
+</html>
